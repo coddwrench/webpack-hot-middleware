@@ -28,7 +28,6 @@ describe('realistic single compiler', function () {
     app.use(
       webpackDevMiddleware(compiler, {
         publicPath: '/',
-        logLevel: 'silent',
       })
     );
     app.use(
@@ -53,8 +52,8 @@ describe('realistic single compiler', function () {
 
           var event = JSON.parse(res.events[0].substring(5));
 
-          assert.equal(event.action, 'sync');
-          assert.equal(event.name, '');
+          assert.strictEqual(event.action, 'sync');
+          assert.strictEqual(event.name, '');
           assert.ok(event.hash);
           assert.ok(event.time);
           assert.ok(Array.isArray(event.warnings));
