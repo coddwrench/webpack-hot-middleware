@@ -4,10 +4,8 @@ var path = require('path');
 var express = require('express');
 var webpack = require('webpack');
 var webpackDevMiddleware = require('webpack-dev-middleware');
-
 var assert = require('assert');
 var supertest = require('supertest');
-
 var webpackHotMiddleware = require('../middleware');
 
 var app, compiler;
