@@ -1,5 +1,10 @@
-node_modules/*
-example/*
-example/node_modules/*
-coverage/*
-test/fixtures/*
+node_modules
+example
+example/node_modules
+coverage
+test
+client-overlay.js
+client.js
+helpers.js
+middleware.js
+process-update.js

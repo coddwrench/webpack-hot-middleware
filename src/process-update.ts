@@ -9,7 +9,7 @@
 interface NodeModule {
   hot: any;
 }
-declare var __webpack_hash__: string;
+declare let __webpack_hash__: string;
 
 interface ProcessUpdateData {
   moduleId: string;
@@ -21,80 +21,77 @@ interface ProcessUpdateData {
 interface ProcessUpdateOptions {
   reload: boolean;
   log: boolean;
-  warn: boolean
+  warn: boolean;
 }
 
 if (!module.hot) {
-  throw new Error('[HMR] Hot Module Replacement is disabled.');
+  throw new Error("[HMR] Hot Module Replacement is disabled.");
 }
 
-var hmrDocsUrl = 'https://webpack.js.org/concepts/hot-module-replacement/'; // eslint-disable-line max-len
+const hmrDocsUrl = "https://webpack.js.org/concepts/hot-module-replacement/"; // eslint-disable-line max-len
 
-var lastHash: string;
-var failureStatuses = { abort: 1, fail: 1 };
-var applyOptions = {
+let lastHash: string;
+const failureStatuses = { abort: 1, fail: 1 };
+const applyOptions = {
   ignoreUnaccepted: true,
   ignoreDeclined: true,
   ignoreErrored: true,
   onUnaccepted: function (data: ProcessUpdateData) {
     console.warn(
-      'Ignored an update to unaccepted module ' + data.chain.join(' -> ')
+      "Ignored an update to unaccepted module " + data.chain.join(" -> ")
     );
   },
   onDeclined: function (data: ProcessUpdateData) {
     console.warn(
-      'Ignored an update to declined module ' + data.chain.join(' -> ')
+      "Ignored an update to declined module " + data.chain.join(" -> ")
     );
   },
   onErrored: function (data: ProcessUpdateData) {
     console.error(data.error);
     console.warn(
-      'Ignored an error while updating module ' +
-      data.moduleId +
-      ' (' +
-      data.type +
-      ')'
+      `Ignored an error while updating module ${data.moduleId} (${data.type})`
     );
   },
 };
 
 function upToDate(hash?: string): boolean {
-  if (hash)
-    lastHash = hash;
+  if (hash) lastHash = hash;
   return lastHash == __webpack_hash__;
 }
 
-module.exports = function (hash: string, moduleMap: { [key: string]: string }, options: ProcessUpdateOptions) {
-  var reload = options.reload;
-  if (!upToDate(hash) && module.hot.status() == 'idle') {
-    if (options.log)
-      console.log('[HMR] Checking for updates on the server...');
+module.exports = function (
+  hash: string,
+  moduleMap: { [key: string]: string },
+  options: ProcessUpdateOptions
+) {
+  const reload = options.reload;
+  if (!upToDate(hash) && module.hot.status() == "idle") {
+    if (options.log) console.log("[HMR] Checking for updates on the server...");
     check();
   }
 
   function check() {
-    var cb = function (err: Error, updatedModules: any) {
+    const cb = function (err: Error, updatedModules: any) {
       if (err) return handleError(err);
 
       if (!updatedModules) {
         if (options.warn) {
-          console.warn('[HMR] Cannot find update (Full reload needed)');
-          console.warn('[HMR] (Probably because of restarting the server)');
+          console.warn("[HMR] Cannot find update (Full reload needed)");
+          console.warn("[HMR] (Probably because of restarting the server)");
         }
         performReload();
         return null;
       }
 
-      var applyCallback = function (applyErr: Error, renewedModules: any) {
+      const applyCallback = function (applyErr: Error, renewedModules: any) {
         if (applyErr) return handleError(applyErr);
 
-        if (!upToDate())
-          check();
+        if (!upToDate()) check();
 
         logUpdates(updatedModules, renewedModules);
       };
 
-      var applyResult = module.hot.apply(applyOptions, applyCallback);
+      const applyResult = module.hot.apply(applyOptions, applyCallback);
       // webpack 2 promise
       if (applyResult && applyResult.then) {
         // HotModuleReplacement.runtime.js refers to the result as `outdatedModules`
@@ -105,7 +102,7 @@ module.exports = function (hash: string, moduleMap: { [key: string]: string }, o
       }
     };
 
-    var result = module.hot.check(false, cb);
+    const result = module.hot.check(false, cb);
     // webpack 2 promise
     if (result && result.then) {
       result.then(function (updatedModules: any) {
@@ -116,7 +113,9 @@ module.exports = function (hash: string, moduleMap: { [key: string]: string }, o
   }
 
   function logUpdates(updatedModules: any, renewedModules: any) {
-    var unacceptedModules = updatedModules.filter(function (moduleId: string) {
+    const unacceptedModules = updatedModules.filter(function (
+      moduleId: string
+    ) {
       return renewedModules && renewedModules.indexOf(moduleId) < 0;
     });
 
@@ -124,15 +123,13 @@ module.exports = function (hash: string, moduleMap: { [key: string]: string }, o
       if (options.warn) {
         console.warn(
           "[HMR] The following modules couldn't be hot updated: " +
-          '(Full reload needed)\n' +
-          'This is usually because the modules which have changed ' +
-          '(and their parents) do not know how to hot reload themselves. ' +
-          'See ' +
-          hmrDocsUrl +
-          ' for more details.'
+            "(Full reload needed)\n" +
+            "This is usually because the modules which have changed " +
+            "(and their parents) do not know how to hot reload themselves. " +
+            `See ${hmrDocsUrl}  for more details.`
         );
         unacceptedModules.forEach(function (moduleId: string) {
-          console.warn('[HMR]  - ' + (moduleMap[moduleId] || moduleId));
+          console.warn("[HMR]  - " + (moduleMap[moduleId] || moduleId));
         });
       }
       performReload();
@@ -141,16 +138,16 @@ module.exports = function (hash: string, moduleMap: { [key: string]: string }, o
 
     if (options.log) {
       if (!renewedModules || renewedModules.length === 0) {
-        console.log('[HMR] Nothing hot updated.');
+        console.log("[HMR] Nothing hot updated.");
       } else {
-        console.log('[HMR] Updated modules:');
+        console.log("[HMR] Updated modules:");
         renewedModules.forEach(function (moduleId: string) {
-          console.log('[HMR]  - ' + (moduleMap[moduleId] || moduleId));
+          console.log("[HMR]  - " + (moduleMap[moduleId] || moduleId));
         });
       }
 
       if (upToDate()) {
-        console.log('[HMR] App is up to date.');
+        console.log("[HMR] App is up to date.");
       }
     }
   }
@@ -158,20 +155,20 @@ module.exports = function (hash: string, moduleMap: { [key: string]: string }, o
   function handleError(err: Error) {
     if (module.hot.status() in failureStatuses) {
       if (options.warn) {
-        console.warn('[HMR] Cannot check for update (Full reload needed)');
-        console.warn('[HMR] ' + (err.stack || err.message));
+        console.warn("[HMR] Cannot check for update (Full reload needed)");
+        console.warn("[HMR] " + (err.stack || err.message));
       }
       performReload();
       return;
     }
     if (options.warn) {
-      console.warn('[HMR] Update check failed: ' + (err.stack || err.message));
+      console.warn("[HMR] Update check failed: " + (err.stack || err.message));
     }
   }
 
   function performReload() {
     if (reload) {
-      if (options.warn) console.warn('[HMR] Reloading page');
+      if (options.warn) console.warn("[HMR] Reloading page");
       window.location.reload();
     }
   }

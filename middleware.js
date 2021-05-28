@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.webpackHotMiddleware = void 0;
 var helpers_1 = require("./helpers");
+var defaultOptions = {};
 function webpackHotMiddleware(compiler, opts) {
     opts = opts || {};
     opts.log = typeof opts.log == 'undefined' ? console.log.bind(console) : opts.log;
@@ -9,7 +10,7 @@ function webpackHotMiddleware(compiler, opts) {
     opts.heartbeat = opts.heartbeat || 10 * 1000;
     var latestStats = null;
     var closed = false;
-    var eventStream = createEventStream(opts.heartbeat);
+    var eventStream = new EventStream(opts.heartbeat);
     if (compiler.hooks) {
         compiler.hooks.invalid.tap('webpack-hot-middleware', onInvalid);
         compiler.hooks.done.tap('webpack-hot-middleware', onDone);
@@ -18,7 +19,7 @@ function webpackHotMiddleware(compiler, opts) {
         compiler.plugin('invalid', onInvalid);
         compiler.plugin('done', onDone);
     }
-    function onInvalid(statsResult) {
+    function onInvalid() {
         var date = new Date();
         if (closed)
             return date;
@@ -64,61 +65,67 @@ function webpackHotMiddleware(compiler, opts) {
     return middleware;
 }
 exports.webpackHotMiddleware = webpackHotMiddleware;
-function createEventStream(heartbeat) {
-    var clientId = 0;
-    var clients = {};
-    function everyClient(fn) {
-        Object.keys(clients).forEach(function (id) {
-            fn(clients[id]);
-        });
+var EventStream = /** @class */ (function () {
+    function EventStream(heartbeat) {
+        var _this = this;
+        this._clientId = 0;
+        this._clients = {};
+        var intervalHandler = function () {
+            _this.everyClient(function (client) {
+                client.write('data: \uD83D\uDC93\n\n');
+            });
+        };
+        this._interval = setInterval(intervalHandler.bind(this), heartbeat).unref();
     }
-    var interval = setInterval(function heartbeatTick() {
-        everyClient(function (client) {
-            client.write('data: \uD83D\uDC93\n\n');
+    EventStream.prototype.everyClient = function (fn) {
+        var _this = this;
+        Object.keys(this._clients).forEach(function (id) {
+            fn(_this._clients[id]);
         });
-    }, heartbeat).unref();
-    return {
-        close: function () {
-            clearInterval(interval);
-            everyClient(function (client) {
-                if (!client.finished)
-                    client.end();
-            });
-            clients = {};
-        },
-        handler: function (req, res) {
-            var headers = {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'text/event-stream;charset=utf-8',
-                'Cache-Control': 'no-cache, no-transform',
-                // While behind nginx, event stream should not be buffered:
-                // http://nginx.org/docs/http/ngx_http_proxy_module.html#proxy_buffering
-                'X-Accel-Buffering': 'no',
-            };
-            var isHttp1 = !(parseInt(req.httpVersion) >= 2);
-            if (isHttp1) {
-                req.socket.setKeepAlive(true);
-                Object.assign(headers, {
-                    Connection: 'keep-alive',
-                });
-            }
-            res.writeHead(200, headers);
-            res.write('\n');
-            var id = clientId++;
-            clients[id] = res;
-            req.on('close', function () {
-                if (!res.finished)
-                    res.end();
-                delete clients[id];
-            });
-        },
-        publish: function (payload) {
-            everyClient(function (client) {
-                client.write('data: ' + JSON.stringify(payload) + '\n\n');
-            });
-        },
     };
-}
+    EventStream.prototype.close = function () {
+        clearInterval(this._interval);
+        this.everyClient(function (client) {
+            if (!client.finished)
+                client.end();
+        });
+        this._clients = {};
+    };
+    EventStream.prototype.publish = function (payload) {
+        this.everyClient(function (client) {
+            client.write('data: ' + JSON.stringify(payload) + '\n\n');
+        });
+    };
+    EventStream.prototype.handler = function (req, res) {
+        var _this = this;
+        var headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'text/event-stream;charset=utf-8',
+            'Cache-Control': 'no-cache, no-transform',
+            // While behind nginx, event stream should not be buffered:
+            // http://nginx.org/docs/http/ngx_http_proxy_module.html#proxy_buffering
+            'X-Accel-Buffering': 'no',
+        };
+        var isHttp = !(parseInt(req.httpVersion) >= 2);
+        if (isHttp) {
+            req.socket.setKeepAlive(true);
+            Object.assign(headers, {
+                Connection: 'keep-alive',
+            });
+        }
+        res.writeHead(200, headers);
+        res.write('\n');
+        var id = this._clientId++;
+        this._clients[id] = res;
+        var closeHandler = function () {
+            if (!res.finished)
+                res.end();
+            delete _this._clients[id];
+        };
+        req.on('close', closeHandler);
+    };
+    return EventStream;
+}());
 function publishStats(action, statsResult, eventStream, log) {
     var stats = statsResult.toJson({
         all: false,

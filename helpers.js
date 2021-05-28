@@ -11,5 +11,4 @@ function pathMatch(url, path) {
     }
 }
 exports.pathMatch = pathMatch;
-;
 //# sourceMappingURL=helpers.js.map

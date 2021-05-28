@@ -5,4 +5,4 @@ export function pathMatch(url: string, path: string) {
   } catch (e) {
     return false;
   }
-};
+}

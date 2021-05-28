@@ -1,8 +1,8 @@
 /*eslint-env browser*/
 /*global __resourceQuery __webpack_public_path__*/
 
-declare var __resourceQuery: string;
-declare var __webpack_public_path__: string;
+declare let __resourceQuery: string;
+declare let __webpack_public_path__: string;
 
 interface Window {
   __whmEventSourceWrapper: any;
@@ -10,47 +10,47 @@ interface Window {
 }
 
 declare interface ClientOptions {
-  path: string,
-  timeout: number,
-  overlay: boolean,
-  reload: boolean,
-  log: boolean,
-  warn: boolean,
-  name: string,
-  noInfo?: boolean,
-  quiet?: boolean,
-  autoConnect: boolean,
-  overlayStyles: { [key: string]: string | number },
-  overlayWarnings: boolean,
-  ansiColors: { [key: string]: string | Array<string> },
-  dynamicPublicPath?: string
+  path: string;
+  timeout: number;
+  overlay: boolean;
+  reload: boolean;
+  log: boolean;
+  warn: boolean;
+  name: string;
+  noInfo?: boolean;
+  quiet?: boolean;
+  autoConnect: boolean;
+  overlayStyles: { [key: string]: string | number };
+  overlayWarnings: boolean;
+  ansiColors: { [key: string]: string | Array<string> };
+  dynamicPublicPath?: string;
 }
 
 declare interface OverridesClientOptions {
-  path: string,
-  timeout: string,
-  overlay: string,
-  reload: string,
-  log: string,
-  warn: string,
-  name: string,
-  noInfo?: string,
-  quiet?: string,
-  autoConnect: string,
-  overlayStyles: string,
-  overlayWarnings: string,
-  ansiColors: string,
-  dynamicPublicPath?: string
+  path: string;
+  timeout: string;
+  overlay: string;
+  reload: string;
+  log: string;
+  warn: string;
+  name: string;
+  noInfo?: string;
+  quiet?: string;
+  autoConnect: string;
+  overlayStyles: string;
+  overlayWarnings: string;
+  ansiColors: string;
+  dynamicPublicPath?: string;
 }
 
-var options: ClientOptions = {
-  path: '/__webpack_hmr',
+const options: ClientOptions = {
+  path: "/__webpack_hmr",
   timeout: 20 * 1000,
   overlay: true,
   reload: false,
   log: true,
   warn: true,
-  name: '',
+  name: "",
   autoConnect: true,
   overlayStyles: {},
   overlayWarnings: false,
@@ -58,18 +58,18 @@ var options: ClientOptions = {
 };
 
 if (__resourceQuery) {
-  var querystring = require('querystring');
-  var overrides = querystring.parse(__resourceQuery.slice(1));
+  const querystring = require("querystring");
+  const overrides = querystring.parse(__resourceQuery.slice(1));
   setOverrides(overrides);
 }
 
-if (typeof window === 'undefined') {
+if (typeof window === "undefined") {
   // do nothing
-} else if (typeof window.EventSource === 'undefined') {
+} else if (typeof window.EventSource === "undefined") {
   console.warn(
     "webpack-hot-middleware's client requires EventSource to work. " +
-    'You should include a polyfill if you want to support this browser: ' +
-    'https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events#Tools'
+      "You should include a polyfill if you want to support this browser: " +
+      "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events#Tools"
   );
 } else {
   if (options.autoConnect) {
@@ -85,18 +85,18 @@ function setOptionsAndConnect(overrides: OverridesClientOptions) {
 
 function setOverrides(overrides: OverridesClientOptions) {
   if (overrides.autoConnect)
-    options.autoConnect = overrides.autoConnect == 'true';
+    options.autoConnect = overrides.autoConnect == "true";
   if (overrides.path) options.path = overrides.path;
   if (overrides.timeout) options.timeout = parseInt(overrides.timeout);
-  if (overrides.overlay) options.overlay = overrides.overlay !== 'false';
-  if (overrides.reload) options.reload = overrides.reload !== 'false';
-  if (overrides.noInfo && overrides.noInfo !== 'false') {
+  if (overrides.overlay) options.overlay = overrides.overlay !== "false";
+  if (overrides.reload) options.reload = overrides.reload !== "false";
+  if (overrides.noInfo && overrides.noInfo !== "false") {
     options.log = false;
   }
   if (overrides.name) {
     options.name = overrides.name;
   }
-  if (overrides.quiet && overrides.quiet !== 'false') {
+  if (overrides.quiet && overrides.quiet !== "false") {
     options.log = false;
     options.warn = false;
   }
@@ -111,17 +111,17 @@ function setOverrides(overrides: OverridesClientOptions) {
     options.overlayStyles = JSON.parse(overrides.overlayStyles as string);
 
   if (overrides.overlayWarnings) {
-    options.overlayWarnings = overrides.overlayWarnings == 'true';
+    options.overlayWarnings = overrides.overlayWarnings == "true";
   }
 }
 
 function EventSourceWrapper() {
-  var source: EventSource;
-  var lastActivity = new Date().getTime();
-  var listeners = Array<(ev: Event) => void>();
+  let source: EventSource;
+  let lastActivity = new Date().getTime();
+  const listeners = Array<(ev: Event) => void>();
 
   init();
-  var timer = setInterval(function () {
+  const timer = setInterval(function () {
     if (new Date().getTime() - lastActivity > options.timeout)
       handleDisconnect();
   }, options.timeout / 2);
@@ -134,13 +134,13 @@ function EventSourceWrapper() {
   }
 
   function handleOnline() {
-    if (options.log) console.log('[HMR] connected');
+    if (options.log) console.log("[HMR] connected");
     lastActivity = new Date().getTime();
   }
 
   function handleMessage(event: Event) {
     lastActivity = new Date().getTime();
-    for (var i = 0; i < listeners.length; i++) {
+    for (let i = 0; i < listeners.length; i++) {
       listeners[i](event);
     }
   }
@@ -174,14 +174,14 @@ function connect() {
   getEventSourceWrapper().addMessageListener(handleMessage);
 
   function handleMessage(event: { data: string }) {
-    if (event.data == '\uD83D\uDC93') {
+    if (event.data == "\uD83D\uDC93") {
       return;
     }
     try {
       processMessage(JSON.parse(event.data));
     } catch (ex) {
       if (options.warn) {
-        console.warn('Invalid HMR message: ' + event.data + '\n' + ex);
+        console.warn("Invalid HMR message: " + event.data + "\n" + ex);
       }
     }
   }
@@ -191,8 +191,8 @@ function connect() {
 // in case the client is being used by multiple bundles
 // we only want to report once.
 // all the errors will go to all clients
-var reporter: any;
-if (typeof window !== 'undefined') {
+let reporter: any;
+if (typeof window !== "undefined") {
   if (!window.__webpack_hot_middleware_reporter__) {
     window.__webpack_hot_middleware_reporter__ = createReporter();
   }
@@ -200,47 +200,48 @@ if (typeof window !== 'undefined') {
 }
 
 function createReporter() {
-  var strip = require('strip-ansi');
+  const strip = require("strip-ansi");
 
-  var overlay: any;
-  if (typeof document !== 'undefined' && options.overlay) {
-    overlay = require('./client-overlay')({
+  let overlay: any;
+  if (typeof document !== "undefined" && options.overlay) {
+    overlay = require("./client-overlay")({
       ansiColors: options.ansiColors,
       overlayStyles: options.overlayStyles,
     });
   }
 
-  var styles: { [key: string]: string } = {
-    errors: 'color: #ff0000;',
-    warnings: 'color: #999933;',
+  const styles: { [key: string]: string } = {
+    errors: "color: #ff0000;",
+    warnings: "color: #999933;",
   };
-  var previousProblems: any = null;
+  let previousProblems: any = null;
   function log(type: any, obj: any) {
-    var newProblems = obj[type]
+    const newProblems = obj[type]
       .map(function (msg: string) {
         return strip(msg);
       })
-      .join('\n');
+      .join("\n");
     if (previousProblems == newProblems) {
       return;
     } else {
       previousProblems = newProblems;
     }
 
-    var style = styles[type];
-    var name = obj.name ? "'" + obj.name + "' " : '';
-    var title = '[HMR] bundle ' + name + 'has ' + obj[type].length + ' ' + type;
+    const style = styles[type];
+    const name = obj.name ? "'" + obj.name + "' " : "";
+    const title =
+      "[HMR] bundle " + name + "has " + obj[type].length + " " + type;
     // NOTE: console.warn or console.error will print the stack trace
     // which isn't helpful here, so using console.log to escape it.
     if (console.group && console.groupEnd) {
-      console.group('%c' + title, style);
-      console.log('%c' + newProblems, style);
+      console.group("%c" + title, style);
+      console.log("%c" + newProblems, style);
       console.groupEnd();
     } else {
       console.log(
-        '%c' + title + '\n\t%c' + newProblems.replace(/\n/g, '\n\t'),
-        style + 'font-weight: bold;',
-        style + 'font-weight: normal;'
+        "%c" + title + "\n\t%c" + newProblems.replace(/\n/g, "\n\t"),
+        style + "font-weight: bold;",
+        style + "font-weight: normal;"
       );
     }
   }
@@ -254,7 +255,7 @@ function createReporter() {
         log(type, obj);
       }
       if (overlay) {
-        if (options.overlayWarnings || type === 'errors') {
+        if (options.overlayWarnings || type === "errors") {
           overlay.showProblems(type, obj[type]);
           return false;
         }
@@ -271,44 +272,43 @@ function createReporter() {
   };
 }
 
-var processUpdate = require('./process-update');
+const processUpdate = require("./process-update");
 
-var customHandler: any;
-var subscribeAllHandler: any;
+let customHandler: any;
+let subscribeAllHandler: any;
 function processMessage(obj: any) {
   switch (obj.action) {
-    case 'building':
+    case "building":
       if (options.log) {
         console.log(
-          '[HMR] bundle ' +
-          (obj.name ? "'" + obj.name + "' " : '') +
-          'rebuilding'
+          "[HMR] bundle " +
+            (obj.name ? "'" + obj.name + "' " : "") +
+            "rebuilding"
         );
       }
       break;
-    case 'built':
+    case "built":
       if (options.log) {
         console.log(
-          '[HMR] bundle ' +
-          (obj.name ? "'" + obj.name + "' " : '') +
-          'rebuilt in ' +
-          obj.time +
-          'ms'
+          "[HMR] bundle " +
+            (obj.name ? "'" + obj.name + "' " : "") +
+            "rebuilt in " +
+            obj.time +
+            "ms"
         );
       }
     // fall through
-    case 'sync':
+    case "sync":
       if (obj.name && options.name && obj.name !== options.name) {
         return;
       }
       var applyUpdate = true;
       if (obj.errors.length > 0) {
-        if (reporter)
-          reporter.problems('errors', obj);
+        if (reporter) reporter.problems("errors", obj);
         applyUpdate = false;
       } else if (obj.warnings.length > 0) {
         if (reporter) {
-          var overlayShown = reporter.problems('warnings', obj);
+          const overlayShown = reporter.problems("warnings", obj);
           applyUpdate = overlayShown;
         }
       } else {

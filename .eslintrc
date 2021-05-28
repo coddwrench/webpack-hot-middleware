@@ -1,18 +1,32 @@
 {
-  "extends": "eslint:recommended",
+  "root": false,
   "env": {
     "node": true
   },
+  "parser": "@typescript-eslint/parser",
   "plugins": [
-    "prettier"
+    "prettier",
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.ts"
+      ]
+    }
   ],
   "rules": {
-    "no-console": "off",
-    "prettier/prettier": [
-      "error",
+    "quotes": [
+      2,
+      "double",
       {
-        "endOfLine": "auto"
+        "avoidEscape": true
       }
-    ]
+    ],
+    "no-console": "off"
   }
 }

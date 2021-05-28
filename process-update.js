@@ -21,11 +21,7 @@ var applyOptions = {
     },
     onErrored: function (data) {
         console.error(data.error);
-        console.warn('Ignored an error while updating module ' +
-            data.moduleId +
-            ' (' +
-            data.type +
-            ')');
+        console.warn("Ignored an error while updating module " + data.moduleId + " (" + data.type + ")");
     },
 };
 function upToDate(hash) {
@@ -88,9 +84,7 @@ module.exports = function (hash, moduleMap, options) {
                     '(Full reload needed)\n' +
                     'This is usually because the modules which have changed ' +
                     '(and their parents) do not know how to hot reload themselves. ' +
-                    'See ' +
-                    hmrDocsUrl +
-                    ' for more details.');
+                    ("See " + hmrDocsUrl + "  for more details."));
                 unacceptedModules.forEach(function (moduleId) {
                     console.warn('[HMR]  - ' + (moduleMap[moduleId] || moduleId));
                 });
